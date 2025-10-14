@@ -57,3 +57,4 @@ if __name__ == "__main__":
     
     records = networkobj.csv_to_json_convertor(file_path=FILE_PATH)
     len_records = networkobj.push_data_to_mongodb(records=records, database=DATABASE, collection=Collection)
+
