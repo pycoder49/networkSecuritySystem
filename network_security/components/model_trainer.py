@@ -9,7 +9,8 @@ from network_security.entity.config_entity import (
 )
 from network_security.entity.artifact_entity import (
     DataTransformationArtifact,
-    ModelTrainerArtifact
+    ModelTrainerArtifact,
+    ClassificationMetricArtifact
 )
 from network_security.utils.main_utils.utils import (
     save_object, 
@@ -28,10 +29,15 @@ from sklearn.ensemble import (
 )
 from xgboost import XGBClassifier
 from sklearn.metrics import r2_score
+import mlflow
+import dagshub
 
 import pandas as pd
 import numpy as np
 import os, sys
+
+import dagshub
+dagshub.init(repo_owner='pycoder49', repo_name='networkSecuritySystem', mlflow=True)
 
 
 class ModelTrainer:
@@ -43,7 +49,24 @@ class ModelTrainer:
         except Exception as e:
             raise NetworkSecurityException(e, sys)
         
+    def track_mlflow(self, model, 
+                     train_metric: ClassificationMetricArtifact
+                     ):
+        try:
+            with mlflow.start_run():
+                f1_score = train_metric.f1_score
+                precision = train_metric.precision_score
+                recall = train_metric.recall_score
 
+                mlflow.log_metric("F1_Score", f1_score)
+                mlflow.log_metric("Precision", precision)
+                mlflow.log_metric("Recall", recall)
+
+                # Use artifact_path for DagHub compatibility
+                mlflow.sklearn.log_model(model, "model")
+
+        except Exception as e:
+            raise NetworkSecurityException(e, sys)
 
     def train_model(self, X_train, y_train, X_test, y_test) -> object:
         try:
@@ -124,15 +147,15 @@ class ModelTrainer:
             best_model_score = max(sorted(model_report.values()))
             best_model = models[best_model_name]
 
+            # getting the train classification metrics and tracking using MLFlow
             y_train_pred = best_model.predict(X_train)
             train_classification_metric = get_classification_score(y_true=y_train, y_pred=y_train_pred)
+            self.track_mlflow(best_model, train_classification_metric)
 
-            # tracking the MLFlow
-
-
-            # getting the test classification metrics
+            # getting the test classification metrics and tracking using MLFlow
             y_test_pred = best_model.predict(X_test)
             test_classification_metric = get_classification_score(y_true=y_test, y_pred=y_test_pred)
+            self.track_mlflow(best_model, test_classification_metric)
 
             # loading the object, saving it
             preprocessor = load_object(file_path=self.data_transformation_artifact.transformation_object_path)
@@ -145,6 +168,9 @@ class ModelTrainer:
                 file_path=self.model_trainer_config.trained_model_file_path,
                 obj=network_model
             )
+
+            # saving the final best model in a common directory with preprocessor.pkl
+            save_object("final_model/model.pkl", best_model)
 
             # saving the model trainer artifact
             model_trainer_artifact = ModelTrainerArtifact(

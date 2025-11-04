@@ -77,6 +77,9 @@ class DataTransformation:
             save_numpy_array(self.data_transformation_config.transformed_test_file_path, array=test_nparray)
             save_object(self.data_transformation_config.transformed_object_file_path, obj=knn_processor_obj)
 
+            # saving the final transformation object in comomn directory with model.pkl
+            save_object("final_model/transformer.pkl", obj=knn_processor_obj)
+
             # preparing artifacts
             data_transformation_artifact = DataTransformationArtifact(
                 transformation_object_path = self.data_transformation_config.transformed_object_file_path,
