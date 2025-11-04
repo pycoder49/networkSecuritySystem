@@ -1,5 +1,9 @@
 from network_security.exceptions.exception import NetworkSecurityException
 from network_security.logging.logger import logging
+
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import r2_score
+
 import pandas as pd
 import numpy as np
 import os, sys
@@ -39,6 +43,16 @@ def save_numpy_array(file_path: str, array: np.array) -> None:
             np.save(file, array)
     except Exception as e:
         raise NetworkSecurityException(e, sys)
+    
+
+def load_numpy_array(file_path: str) -> np.array:
+    try:
+        if not os.path.exists(file_path):
+            raise Exception(f"The file: {file_path} does not exist")
+        with open(file_path, "rb") as file:
+            return np.load(file)
+    except Exception as e:
+        raise NetworkSecurityException(e, sys)
 
 
 def save_object(file_path: str, obj: object) -> None:
@@ -48,3 +62,51 @@ def save_object(file_path: str, obj: object) -> None:
             pickle.dump(obj, file)
     except Exception as e:
         raise NetworkSecurityException(e, sys)
+    
+
+def load_object(file_path: str) -> object:
+    try:
+        if not os.path.exists(file_path):
+            raise Exception(f"The file: {file_path} does not exist")
+        with open(file_path, "rb") as file:
+            return pickle.load(file)
+    except Exception as e:
+        raise NetworkSecurityException(e, sys)
+
+
+def evaluate_models(X_train, y_train, 
+                    X_test, y_test,
+                    models: dict, 
+                    params: dict
+                    ) -> dict:
+    try:
+        report = {}
+        
+        for model_name, model in models.items():
+            # Get parameters for this model
+            param = params[model_name]
+
+            # Perform GridSearch
+            gs = GridSearchCV(model, param, cv=3)
+            gs.fit(X_train, y_train)
+
+            # Set best parameters and retrain
+            model.set_params(**gs.best_params_)
+            model.fit(X_train, y_train)
+
+            # Make predictions
+            y_train_pred = model.predict(X_train)
+            y_test_pred = model.predict(X_test)
+
+            # Calculate scores
+            train_model_score = r2_score(y_train, y_train_pred)
+            test_model_score = r2_score(y_test, y_test_pred)
+
+            # Store test score in report
+            report[model_name] = test_model_score
+            
+        return report
+        
+    except Exception as e:
+        raise NetworkSecurityException(e, sys)
+    
