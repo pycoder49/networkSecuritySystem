@@ -3,7 +3,6 @@
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-00a393.svg)](https://fastapi.tiangolo.com/)
 [![MLflow](https://img.shields.io/badge/MLflow-2.15-0194E2.svg)](https://mlflow.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An end-to-end machine learning system for detecting phishing websites using network security data. Built with production-grade MLOps practices including automated training pipelines, experiment tracking, and real-time inference API.
 
@@ -144,47 +143,6 @@ networkSecuritySystem/
 - **Jinja2**: Template rendering
 - **Python-dotenv**: Environment management
 
-## 📦 Installation
-
-### Prerequisites
-- Python 3.12+
-- MongoDB instance (local or Atlas)
-- Git
-
-### Setup
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/pycoder49/networkSecuritySystem.git
-cd networkSecuritySystem
-```
-
-2. **Create virtual environment**
-```bash
-# Using conda
-conda create -p ./venv python=3.12 -y
-conda activate ./venv
-
-# Or using venv
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. **Install dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-4. **Configure environment variables**
-```bash
-# Create .env file
-echo 'MONGODB_URI="your_mongodb_connection_string"' > .env
-```
-
-5. **Verify MongoDB connection**
-```bash
-python test_mongodb.py
-```
 
 ## 🚀 Usage
 
@@ -203,24 +161,8 @@ This will:
 5. Log experiments to MLflow
 6. Save best model to `final_model/`
 
-### Starting the API Server
-
-```bash
-# Start FastAPI server
-uvicorn app:app --reload --host localhost --port 8000
-```
-
-Access the API:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
 
 ### Making Predictions
-
-#### Via API (Swagger UI)
-1. Navigate to http://localhost:8000/docs
-2. Click on `/predict` endpoint
-3. Upload CSV file with network features
-4. View predictions in HTML table format
 
 #### Via cURL
 ```bash
@@ -296,54 +238,6 @@ Logged metrics:
 - Model parameters
 - Training artifacts
 
-## 🧪 Testing
-
-```bash
-# Test individual components
-python -m network_security.components.data_ingestion
-python -m network_security.components.data_validation
-python -m network_security.components.model_trainer
-
-# Test API endpoints
-pytest tests/  # (if test suite exists)
-```
-
-## 🐛 Troubleshooting
-
-### MongoDB Connection Issues
-```python
-# Verify connection with certifi
-import certifi
-ca = certifi.where()
-client = pymongo.MongoClient(MONGODB_URI, tlsCAFile=ca)
-```
-
-### Model Loading Errors
-Ensure preprocessor and model are in `final_model/`:
-```
-final_model/
-├── preprocessor.pkl
-└── model.pkl
-```
-
-### API Server Issues
-```bash
-# Check if port is already in use
-netstat -ano | findstr :8000  # Windows
-lsof -i :8000                 # Linux/Mac
-
-# Use different port
-uvicorn app:app --port 8001
-```
-
-## 🚦 Development Workflow
-
-1. **Data Exploration**: Jupyter notebooks for EDA
-2. **Component Development**: Build and test individual pipeline components
-3. **Integration**: Connect components in `main.py`
-4. **Experimentation**: Use MLflow to track experiments
-5. **API Development**: Implement endpoints in `app.py`
-6. **Deployment**: Deploy to cloud (AWS, Azure, GCP)
 
 ## 🎯 Future Enhancements
 
@@ -364,18 +258,3 @@ uvicorn app:app --port 8001
 - Email: aryan-a@outlook.com
 - GitHub: [@pycoder49](https://github.com/pycoder49)
 - DagHub: [pycoder49/networkSecuritySystem](https://dagshub.com/pycoder49/networkSecuritySystem)
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Dataset: Network security phishing detection dataset
-- MLflow for experiment tracking
-- DagHub for remote tracking server
-- FastAPI community for excellent documentation
-
----
-
-**Note**: This is a portfolio project demonstrating end-to-end ML engineering skills including pipeline design, MLOps practices, API development, and production-ready code organization.
