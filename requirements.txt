@@ -10,4 +10,7 @@ dill
 pyaml
 xgboost
 scipy
+fastapi
+uvicorn
+python-multipart
 # -e .
